@@ -1,0 +1,74 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2709
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 //@version=4\
+strategy("Forex Indicator v2", overlay=true, initial_capital=10000, commission_type=strategy.commission.percent, commission_value=0.1)\
+\
+// Calculate the moving averages and EMAs\
+fast_ma = sma(close, 10)\
+slow_ma = sma(close, 20)\
+ema10 = ema(close, 10)\
+ema20 = ema(close, 20)\
+ema50 = ema(close, 50)\
+ema100 = ema(close, 100)\
+ema200 = ema(close, 200)\
+\
+// Other technical indicators\
+stoch = stoch(close, high, low, 14, 3, 3)\
+upperBB, basisBB, lowerBB = bbands(close, 20, 2)\
+psar = sar(0.02, 0.02, 0.2)\
+\
+// Fibonacci levels\
+fibLevel0 = 0.0\
+fibLevel1 = 0.236\
+fibLevel2 = 0.382\
+fibLevel3 = 0.5\
+fibLevel4 = 0.618\
+fibLevel5 = 0.786\
+fibLevel6 = 1.0\
+\
+// Entry conditions\
+long_condition = crossover(ema10, ema20) and crossover(ema10, ema50) and close > ema100 and close > ema200\
+short_condition = crossunder(ema10, ema20) and crossunder(ema10, ema50) and close < ema100 and close < ema200\
+\
+// Filters for ranging markets and trending markets\
+rangeFilter = abs(close[10] - close[0]) < (atr(14) * 1)\
+trendingFilter = abs(close[10] - close[0]) > (atr(14) * 1)\
+\
+// Define risk-reward ratio\
+riskRewardRatio = 1.1\
+\
+// Entry conditions considering filters\
+long_entry = long_condition and not rangeFilter and trendingFilter\
+short_entry = short_condition and not rangeFilter and trendingFilter\
+\
+// Strategy Entry\
+strategy.entry("Buy", strategy.long, when=long_entry)\
+strategy.entry("Sell", strategy.short, when=short_entry)\
+\
+// Take profit and stop loss levels\
+long_tp1 = (close * fibLevel6) - (close * fibLevel0)\
+long_tp2 = (close * fibLevel6) - (close * fibLevel1)\
+long_tp3 = (close * fibLevel6) - (close * fibLevel4)\
+\
+short_tp1 = (close * fibLevel0) - (close * fibLevel6)\
+short_tp2 = (close * fibLevel1) - (close * fibLevel6)\
+short_tp3 = (close * fibLevel4) - (close * fibLevel6)\
+\
+long_sl = long_tp1 / riskRewardRatio\
+short_sl = short_tp1 / riskRewardRatio\
+\
+// Strategy Exit\
+strategy.exit("Exit Buy", "Buy", stop=close - long_sl, limit=close + long_tp1)\
+strategy.exit("Exit Sell", "Sell", stop=close + short_sl, limit=close - short_tp1)\
+\
+strategy.exit("Exit Buy TP2", "Buy", stop=close - long_sl, limit=close + long_tp2)\
+strategy.exit("Exit Sell TP2", "Sell", stop=close + short_sl, limit=close - short_tp2)\
+\
+strategy.exit("Exit Buy TP3", "Buy", stop=close - long_sl, limit=close + long_tp3)\
+strategy.exit("Exit Sell TP3", "Sell", stop=close + short_sl, limit=\
+}
